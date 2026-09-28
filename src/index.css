@@ -1,0 +1,49 @@
+:root {
+  font-family: "Avenir Next", "Helvetica Neue", sans-serif;
+  color: #19211f;
+  background: #efeee8;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --ink: #19211f;
+  --paper: #efeee8;
+  --orange: #ef5d3f;
+  --forest: #264437;
+  --line: #d3d5cd;
+  --sage: #cad3be;
+  --mono: "SFMono-Regular", Consolas, monospace;
+  --serif: Georgia, "Times New Roman", serif;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 3px;
+}
+::selection {
+  color: white;
+  background: var(--forest);
+}

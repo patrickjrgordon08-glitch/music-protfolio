@@ -1,0 +1,43 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap");
+:root {
+  font-family: "Manrope", "Avenir Next", sans-serif;
+  color: #e8e9e2;
+  background: #171a18;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --mono: "DM Mono", "SFMono-Regular", monospace;
+  --surface: #1e2220;
+  --line: #303632;
+  --muted: #8b928d;
+  --lime: #d0ef92;
+  --paper: #e8e9e2;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  min-width: 360px;
+  min-height: 100vh;
+  margin: 0;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+#root {
+  min-height: 100vh;
+}
+::selection {
+  color: #171a18;
+  background: var(--lime);
+}

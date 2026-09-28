@@ -1,0 +1,482 @@
+import { useEffect, useState, type CSSProperties } from "react";
+import {
+  AudioLines,
+  ChevronDown,
+  Circle,
+  Disc3,
+  Download,
+  Headphones,
+  Mic2,
+  MoreHorizontal,
+  Music2,
+  Pause,
+  Play,
+  Plus,
+  Repeat2,
+  SlidersHorizontal,
+  Square,
+  Volume2,
+} from "lucide-react";
+import "./App.css";
+type Clip = { title: string; start: number; length: number; color: string };
+type Track = {
+  name: string;
+  kind: string;
+  color: string;
+  level: number;
+  clips: Clip[];
+  muted: boolean;
+  solo: boolean;
+};
+const palette = ["#d0ef92", "#e9a2bc", "#efbb7c", "#87cdc2", "#b9a4df"];
+const initial: Track[] = [
+  {
+    name: "Soft focus",
+    kind: "KEYS · ANALOG LAB",
+    color: palette[0],
+    level: 74,
+    muted: false,
+    solo: false,
+    clips: [
+      { title: "Warm chords", start: 0, length: 4, color: "#a5c96d" },
+      { title: "Warm chords", start: 4, length: 4, color: "#a5c96d" },
+    ],
+  },
+  {
+    name: "Glasshouse",
+    kind: "SYNTH · JUPITER",
+    color: palette[1],
+    level: 66,
+    muted: false,
+    solo: false,
+    clips: [
+      { title: "Glass arpeggio", start: 1, length: 3, color: "#d77f9d" },
+      { title: "Glass arpeggio", start: 5, length: 3, color: "#d77f9d" },
+    ],
+  },
+  {
+    name: "Low tide",
+    kind: "BASS · SUB 37",
+    color: palette[2],
+    level: 81,
+    muted: false,
+    solo: false,
+    clips: [{ title: "Sub pulse", start: 0, length: 8, color: "#d49c59" }],
+  },
+  {
+    name: "Pocket kit",
+    kind: "DRUMS · BREAKS",
+    color: palette[3],
+    level: 72,
+    muted: false,
+    solo: false,
+    clips: [
+      { title: "Kit · verse", start: 0, length: 4, color: "#5dafa3" },
+      { title: "Kit · chorus", start: 4, length: 4, color: "#5dafa3" },
+    ],
+  },
+  {
+    name: "Room tone",
+    kind: "TEXTURE · FIELD",
+    color: palette[4],
+    level: 48,
+    muted: false,
+    solo: false,
+    clips: [
+      { title: "Rain on glass", start: 0.5, length: 7, color: "#9980c6" },
+    ],
+  },
+];
+const posLabel = (pos: number) =>
+  `${String(Math.floor(pos / 16) + 1).padStart(2, "0")}.${Math.floor((pos % 16) / 4) + 1}.${(pos % 4) + 1}`;
+function App() {
+  const [tracks, setTracks] = useState(initial);
+  const [playing, setPlaying] = useState(false);
+  const [pos, setPos] = useState(0);
+  const [bpm, setBpm] = useState(118);
+  const [loop, setLoop] = useState(true);
+  useEffect(() => {
+    if (!playing) return;
+    const timer = window.setInterval(() => setPos((p) => (p + 1) % 128), 125);
+    return () => window.clearInterval(timer);
+  }, [playing]);
+  const change = (index: number, patch: Partial<Track>) =>
+    setTracks((current) =>
+      current.map((track, i) => (i === index ? { ...track, ...patch } : track)),
+    );
+  const addTrack = () =>
+    setTracks((current) => [
+      ...current,
+      {
+        name: `New layer ${String(current.length + 1).padStart(2, "0")}`,
+        kind: "AUDIO · INPUT 1",
+        color: palette[current.length % palette.length],
+        level: 70,
+        muted: false,
+        solo: false,
+        clips: [],
+      },
+    ]);
+  const exportSession = () => {
+    const url = URL.createObjectURL(
+      new Blob(
+        [
+          JSON.stringify(
+            { title: "After the rain", bpm, timeSignature: "4/4", tracks },
+            null,
+            2,
+          ),
+        ],
+        { type: "application/json" },
+      ),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "after-the-rain-session.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+  const playhead = { left: `${(pos / 128) * 100}%` } as CSSProperties;
+  return (
+    <main className="studio-shell">
+      <header className="topbar">
+        <a className="brand" href="#studio">
+          <span className="brand-mark">
+            <AudioLines size={19} />
+          </span>
+          <span>
+            northline<span className="brand-sub"> / studio</span>
+          </span>
+        </a>
+        <div className="save-state">
+          <i /> All changes saved <em>/</em> Untitled session
+        </div>
+        <div className="top-actions">
+          <button
+            className="icon-button"
+            aria-label="Monitoring"
+            title="Monitoring"
+          >
+            <Headphones size={17} />
+          </button>
+          <button className="export-button" onClick={exportSession}>
+            <Download size={15} /> Export session
+          </button>
+          <button className="avatar" aria-label="Account">
+            S
+          </button>
+        </div>
+      </header>
+      <section className="session-heading">
+        <div>
+          <div className="eyebrow">
+            PROJECT 014 <i /> LAST EDITED JUST NOW
+          </div>
+          <h1>
+            After the rain <ChevronDown size={17} />
+          </h1>
+        </div>
+        <div className="session-meta">
+          <span>
+            <Disc3 size={15} /> 44.1 kHz
+          </span>
+          <i /> 24 bit <i />
+          <span className="avatars">
+            <b>J</b>
+            <b>M</b>
+            <b>+1</b>
+          </span>
+        </div>
+      </section>
+      <section className="transport">
+        <div className="transport-buttons">
+          <button className="record" aria-label="Record" title="Record">
+            <Circle size={14} fill="currentColor" />
+          </button>
+          <button
+            aria-label="Stop"
+            title="Stop"
+            onClick={() => {
+              setPlaying(false);
+              setPos(0);
+            }}
+          >
+            <Square size={14} fill="currentColor" />
+          </button>
+          <button
+            className="play"
+            aria-label={playing ? "Pause" : "Play"}
+            title={playing ? "Pause" : "Play"}
+            onClick={() => setPlaying(!playing)}
+          >
+            {playing ? (
+              <Pause size={17} fill="currentColor" />
+            ) : (
+              <Play size={17} fill="currentColor" />
+            )}
+          </button>
+          <button
+            className={loop ? "active" : ""}
+            aria-label="Toggle loop"
+            title="Toggle loop"
+            onClick={() => setLoop(!loop)}
+          >
+            <Repeat2 size={17} />
+          </button>
+        </div>
+        <div className="position">
+          <strong>{posLabel(pos)}</strong>
+          <small>BAR · BEAT · TICK</small>
+        </div>
+        <div className="transport-right">
+          <div className="tempo">
+            <button
+              aria-label="Decrease tempo"
+              onClick={() => setBpm((v) => Math.max(40, v - 1))}
+            >
+              −
+            </button>
+            <b>
+              {bpm}
+              <small> BPM</small>
+            </b>
+            <button
+              aria-label="Increase tempo"
+              onClick={() => setBpm((v) => Math.min(240, v + 1))}
+            >
+              +
+            </button>
+          </div>
+          <button className="meter">
+            4/4 <ChevronDown size={13} />
+          </button>
+          <button
+            className="icon-button"
+            title="Metronome"
+            aria-label="Metronome"
+          >
+            <SlidersHorizontal size={17} />
+          </button>
+        </div>
+      </section>
+      <div className="workspace-tools">
+        <div className="tabs">
+          <button className="selected">
+            <Music2 size={15} /> Arrangement
+          </button>
+          <button>
+            <SlidersHorizontal size={15} /> Mixer
+          </button>
+        </div>
+        <span className="snap">
+          ● SNAP <b>1/16</b>
+          <button
+            className="icon-button"
+            title="More options"
+            aria-label="More options"
+          >
+            <MoreHorizontal size={18} />
+          </button>
+        </span>
+      </div>
+      <section className="work-area" id="studio">
+        <div className="arrangement">
+          <div className="track-head">
+            <span>
+              TRACKS <b>{String(tracks.length).padStart(2, "0")}</b>
+            </span>
+            <button className="add-track" onClick={addTrack}>
+              <Plus size={15} /> Add track
+            </button>
+          </div>
+          <div className="timeline-scroll">
+            <div className="ruler">
+              <span className="ruler-label">
+                BAR <b>01 — 08</b>
+              </span>
+              <div className="bar-numbers">
+                {Array.from({ length: 8 }, (_, i) => (
+                  <span
+                    className={Math.floor(pos / 16) === i ? "current" : ""}
+                    key={i}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="arrangement-body">
+              <div className="track-list">
+                {tracks.map((track, i) => (
+                  <div
+                    className={`track-info ${track.muted ? "muted" : ""}`}
+                    key={`${track.name}-${i}`}
+                  >
+                    <i
+                      className="track-color"
+                      style={{ background: track.color }}
+                    />
+                    <div className="track-copy">
+                      <strong>{track.name}</strong>
+                      <small>{track.kind}</small>
+                    </div>
+                    <div className="track-buttons">
+                      <button
+                        className={track.muted ? "on" : ""}
+                        aria-label={`${track.muted ? "Unmute" : "Mute"} ${track.name}`}
+                        onClick={() => change(i, { muted: !track.muted })}
+                      >
+                        M
+                      </button>
+                      <button
+                        className={track.solo ? "solo-on" : ""}
+                        aria-label={`${track.solo ? "Unsolo" : "Solo"} ${track.name}`}
+                        onClick={() => change(i, { solo: !track.solo })}
+                      >
+                        S
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="clip-grid">
+                <div className="grid-lines" />
+                {tracks.map((track, ti) => (
+                  <div className="clip-lane" key={`lane-${ti}`}>
+                    {track.clips.map((clip, ci) => (
+                      <div
+                        className="clip"
+                        key={`${clip.title}-${ci}`}
+                        style={
+                          {
+                            left: `${(clip.start / 8) * 100}%`,
+                            width: `${(clip.length / 8) * 100}%`,
+                            "--clip": clip.color,
+                          } as CSSProperties
+                        }
+                      >
+                        <span className="wave">
+                          {Array.from({ length: 40 }, (_, n) => (
+                            <i
+                              key={n}
+                              style={{
+                                height: `${18 + ((n * 17 + ci * 13 + ti * 7) % 66)}%`,
+                              }}
+                            />
+                          ))}
+                        </span>
+                        <span className="clip-title">{clip.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+                <div className="playhead" style={playhead} />
+              </div>
+            </div>
+          </div>
+          <div className="arrangement-footer">
+            <span>
+              <i /> AUDIO ENGINE READY
+            </span>
+            <span>
+              8 BARS <b>/</b> 00:16.27
+            </span>
+          </div>
+        </div>
+        <aside className="mixer">
+          <div className="mixer-heading">
+            <div>
+              <small>OUTPUT</small>
+              <h2>Channel mixer</h2>
+            </div>
+            <button className="icon-button" aria-label="Mixer settings">
+              <MoreHorizontal size={18} />
+            </button>
+          </div>
+          <div className="master">
+            <span className="master-icon">
+              <Volume2 size={17} />
+            </span>
+            <span className="master-name">
+              <b>Master out</b>
+              <small>STEREO · 1/2</small>
+            </span>
+            <span className="master-meter">
+              <i />
+              <i />
+            </span>
+            <b className="master-db">
+              −2.4 <small>DB</small>
+            </b>
+          </div>
+          <div className="channel-list">
+            {tracks.map((track, i) => (
+              <div
+                className={`channel ${track.muted ? "muted" : ""}`}
+                key={`channel-${i}`}
+              >
+                <i
+                  className="channel-color"
+                  style={{ background: track.color }}
+                />
+                <span className="channel-name">
+                  <b>{track.name}</b>
+                  <small>{i === 1 ? "L 12" : i === 4 ? "R 18" : "C"}</small>
+                </span>
+                <span className="fader">
+                  <input
+                    aria-label={`${track.name} volume`}
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={track.level}
+                    onChange={(e) =>
+                      change(i, { level: Number(e.target.value) })
+                    }
+                    style={
+                      {
+                        "--level": `${track.level}%`,
+                        "--channel": track.color,
+                      } as CSSProperties
+                    }
+                  />
+                  <small>{((track.level / 100) * 6 - 6).toFixed(1)} DB</small>
+                </span>
+                <i className="meter">
+                  <b style={{ height: `${track.level}%` }} />
+                </i>
+              </div>
+            ))}
+          </div>
+          <div className="mixer-foot">
+            <span>
+              <Mic2 size={13} /> MAIN OUTPUT
+            </span>
+            <span>
+              PEAK <b>−1.2 DB</b>
+            </span>
+          </div>
+          <div className="monitor">
+            <Headphones size={17} />
+            <span>
+              <b>Studio monitors</b>
+              <small>Output 1–2 · 48 kHz</small>
+            </span>
+            <i />
+          </div>
+        </aside>
+      </section>
+      <footer className="statusbar">
+        <span>
+          <AudioLines size={14} /> NORTHLINE AUDIO ENGINE <i />
+        </span>
+        <span>
+          CPU <b>08%</b>
+          <i /> MEMORY <b>1.2 GB</b>
+          <i /> <Volume2 size={13} /> 48.0 KHZ
+        </span>
+      </footer>
+    </main>
+  );
+}
+export default App;

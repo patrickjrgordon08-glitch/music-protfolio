@@ -1,0 +1,8 @@
+@@ -93,5 +93,7 @@
+   const [tracks, setTracks] = useState(initial);
+   const [playing, setPlaying] = useState(false);
+   const [pos, setPos] = useState(0);
+   const [bpm, setBpm] = useState(118);
+   const [loop, setLoop] = useState(true);
++  const [recording, setRecording] = useState(false);
++  const [activeView, setActiveView] = useState("arrangement");
